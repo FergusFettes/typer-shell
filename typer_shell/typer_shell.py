@@ -30,7 +30,8 @@ def make_typer_shell(
     app.command(hidden=True)(shell)
 
     if params and not params_path:
-        params_path = tempfile.NamedTemporaryFile().name
+        params_path = Path(tempfile.NamedTemporaryFile().name)
+    params_path = Path(params_path)
 
     @app.callback(invoke_without_command=True)
     def main(ctx: Context):
@@ -67,7 +68,7 @@ def _obj(
         return
 
     if params_path and not params:
-        with open(params_path) as f:
+        with params_path.open('r') as f:
             params = yaml.load(f, Loader=yaml.FullLoader)
 
     # First ensure obj
@@ -140,7 +141,7 @@ def save(ctx: Context):
     """(s) Save the local params to a file"""
     params = ctx.obj.params_groups[ctx.parent.command.name]['params']
     path = ctx.obj.params_groups[ctx.parent.command.name]['path']
-    with open(path, 'w') as f:
+    with path.open('w') as f:
         yaml.dump(params, f)
     print(f"Saved params to {path}")
 
@@ -148,7 +149,7 @@ def save(ctx: Context):
 def load(ctx: Context):
     """(l) Load the local params from a file"""
     path = ctx.obj.params_groups[ctx.parent.command.name]['path']
-    with open(path, 'r') as f:
+    with path.open('r') as f:
         params = yaml.load(f, Loader=yaml.FullLoader)
     ctx.obj.params_groups[ctx.parent.command.name]['params'] = params
     print(f"Loaded params from {path}")
