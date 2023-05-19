@@ -2,19 +2,24 @@
 
 
 from rich import print
-from typer import Typer, Context
+from typer import Context
 
 from typer_shell import make_typer_shell
 
 
-app = make_typer_shell(prompt="🔥: ", default="name_wrapper")
-inner_app = make_typer_shell(prompt="🌲: ", default="foobar")
+class App:
+    def __init__(self, name: str = "Bob"):
+        self.name = name
+
+
+app = make_typer_shell(prompt="🔥: ", obj=App(), params={"name": "Bob"}, params_path="params.yaml")
+inner_app = make_typer_shell(prompt="🌲: ", params={"name": "Bob"}, params_path="innerparams.yaml")
 
 app.add_typer(inner_app, name="inner")
 
 
 @app.command()
-@inner_app.command()
+# @inner_app.command()
 def foobar(name: str = "Bob"):
     "Foobar command"
     print("Hello", name)
@@ -27,7 +32,8 @@ def name(ctx: Context, name: str = "Bob"):
 
 
 @app.command(hidden=True)
-def name_wrapper(ctx: Context, line: str = "Bob"):
+# @inner_app.command(hidden=True)
+def default(ctx: Context, line: str = "Bob"):
     "Name command wrapper for default"
     ctx.invoke(name, ctx=ctx, name=line)
 
