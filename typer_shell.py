@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 from click_shell import make_click_shell
 from typer import Context, Typer, Argument
+from rich.panel import Panel
 
 from rich import print
 
@@ -22,11 +23,20 @@ def make_typer_shell(
         'obj' is an object to pass to the context
         'params' is a boolean to add a local params command
     """
-    default = default.replace("_", "-")
     app = Typer()
+    default = default.replace("_", "-")
 
     @app.command(hidden=True)
     def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
+        if command == "help":
+            print(Panel(
+                "You have found the secret double help!\n"
+                ":rainbow: Congratulations! :sparkles:\n"
+                "There are a few commands that are hidden from the help menu.\n"
+                "One interesting one is 'shell' which will drop you into an ipython shell. With the context.",
+                title="Double Help",
+                style="bold magenta"
+            ))
         print("\n Type 'command --help' or 'help <command>' for help on a specific command.")
         if not command:
             ctx.parent.get_help()
@@ -78,3 +88,4 @@ def make_typer_shell(
 
 def params():
    """Create a params object and create functions in the local shell for handling the shell params."""
+   pass
