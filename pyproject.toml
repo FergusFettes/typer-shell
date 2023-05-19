@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "typer-shell"
-version = "0.1.0"
+version = "0.1.1"
 description = "A shell for typer apps with autocompletion and history"
 authors = ["fergus <fergusfettes@gmail.com>"]
 readme = "README.md"
