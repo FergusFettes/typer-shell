@@ -31,7 +31,8 @@ def make_typer_shell(
 
     if params and not params_path:
         params_path = Path(tempfile.NamedTemporaryFile().name)
-    params_path = Path(params_path)
+    if params_path:
+        params_path = Path(params_path)
 
     @app.callback(invoke_without_command=True)
     def main(ctx: Context):
