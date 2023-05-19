@@ -1,50 +1,29 @@
 from typing_extensions import Annotated
 from typing import Optional, Callable
+from pathlib import Path
 
+import click
 from click_shell import make_click_shell
-from click_shell.core import get_invoke
 from typer import Context, Typer, Argument
 
 from rich import print
 
 
-def check_aliases(app: Typer, ctx: Context, args: str) -> None:
-    """Check if the command is an alias and run it if it is"""
-    if not args:
-        return
-    args = args.split()
-    command = args[0]
-    if len(args) > 1:
-        args = args[1:]
-    else:
-        args = None
-
-    unaliased = app.aliases.get(command, None)
-    if not unaliased:
-        print("Command not found. Type 'help' to see commands.")
-        return
-
-    root = ctx.find_root()
-    command = root.command.get_command(ctx, unaliased)
-    __import__('ipdb').set_trace()
-    command = get_invoke(command)
-    if args:
-        # For this to work with real commands, you need some way of formatting the rest of the arguments.
-        ctx.invoke(command, args=args)
-    else:
-        ctx.invoke(command)
-
-
 def make_typer_shell(
-        app: Typer,
         prompt: str = ">> ",
         intro: str = "\n Welcome to typer-shell! Type help to see commands.\n",
-        default: Callable = check_aliases,
         obj: Optional[object] = None,
+        default: str = "help",
+        params: bool = False,
+        params_path: Optional[Path] = None
 ) -> None:
-    app.aliases = {
-        "h": "help",
-    }
+    """Create a typer shell
+        'default' is a default command to run if no command is found
+        'obj' is an object to pass to the context
+        'params' is a boolean to add a local params command
+    """
+    default = default.replace("_", "-")
+    app = Typer()
 
     @app.command(hidden=True)
     def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
@@ -52,15 +31,32 @@ def make_typer_shell(
         if not command:
             ctx.parent.get_help()
             return
-        ctx.parent.command.get_command(ctx, command).get_help(ctx)
-
-    @app.command(hidden=True)
-    def _default(ctx: Context, args: str):
-        """Default command"""
-        if default:
-            default(app, ctx, args)
+        _command = ctx.parent.command.get_command(ctx, command)
+        if _command:
+            _command.get_help(ctx)
         else:
-            print("Command not found. Type 'help' to see commands.")
+            print(f"\n Command not found: {command}")
+
+    def _default(line: str):
+        """Default command.
+        Unless you override this, it will call the default command
+        specified in the constructor with the line as arguments.
+        """
+        ctx = click.get_current_context()
+        default_cmd = (
+            ctx.command.get_command(ctx, default)
+            or ctx.command.get_command(ctx, 'help')
+        )
+        try:
+            if default_cmd.name == 'help':
+                ctx.invoke(default_cmd, ctx=ctx, command=line)
+            else:
+                ctx.invoke(default_cmd, ctx=ctx, line=line)
+            # TODO: Check the signature of the default command and try to pass
+            # the arguments as appropriate.
+        except Exception as e:
+            print(e)
+            print(f"Problem running default command: {default}")
 
     @app.callback(invoke_without_command=True)
     def launch(ctx: Context):
@@ -68,9 +64,7 @@ def make_typer_shell(
             ctx.obj = obj
         if ctx.invoked_subcommand is None:
             shell = make_click_shell(ctx, prompt=prompt, intro=intro)
-            root = ctx.find_root()
-            command = root.command.get_command(ctx, "-default")
-            shell.default = command
+            shell.default = _default
             shell.cmdloop()
 
     @app.command(hidden=True)
@@ -78,3 +72,9 @@ def make_typer_shell(
         """Drop into an ipython shell"""
         import IPython
         IPython.embed()
+
+    return app
+
+
+def params():
+   """Create a params object and create functions in the local shell for handling the shell params."""
