@@ -7,7 +7,6 @@ import yaml
 import click
 from click_shell import make_click_shell
 from typer import Context, Typer, Argument
-from rich.panel import Panel
 
 from rich import print
 
