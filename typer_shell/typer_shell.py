@@ -141,6 +141,7 @@ def save(ctx: Context):
     """(s) Save the local params to a file"""
     params = ctx.obj.params_groups[ctx.parent.command.name]['params']
     path = ctx.obj.params_groups[ctx.parent.command.name]['path']
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w') as f:
         yaml.dump(params, f)
     print(f"Saved params to {path}")
