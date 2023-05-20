@@ -33,6 +33,9 @@ def make_typer_shell(
         params_path = Path(tempfile.NamedTemporaryFile().name)
     if params_path:
         params_path = Path(params_path)
+    if params_path:
+        with params_path.open('r') as f:
+            params = yaml.load(f, Loader=yaml.FullLoader)
 
     @app.callback(invoke_without_command=True)
     def main(ctx: Context):
@@ -67,10 +70,6 @@ def _obj(
     # If this is not the main shell and there is already an object from the main shell, print a warning
     if not obj and not params and not params_path:
         return
-
-    if params_path and not params:
-        with params_path.open('r') as f:
-            params = yaml.load(f, Loader=yaml.FullLoader)
 
     # First ensure obj
     if obj and not getattr(ctx, 'obj'):
@@ -189,8 +188,20 @@ def _update(key, value, dict):
 
 def _print(ctx: Context, value: Annotated[Optional[str], Argument()] = None):
     """(p) Print the local params (or a specific value)"""
-    params = ctx.obj.params_groups[ctx.parent.command.name]['params']
+    params = get_params(ctx)
     if value:
         print(params[value])
     else:
         print(params)
+
+
+def get_params(ctx):
+    name = ctx.command.name
+    if name not in ctx.obj.params_groups:
+        if ctx.parent:
+            name = ctx.parent.command.name
+    if name not in ctx.obj.params_groups:
+        print("Cant find params!")
+    else:
+        params = ctx.obj.params_groups[name]['params']
+        return params
