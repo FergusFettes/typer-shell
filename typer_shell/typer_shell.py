@@ -33,7 +33,7 @@ def make_typer_shell(
         params_path = Path(tempfile.NamedTemporaryFile().name)
     if params_path:
         params_path = Path(params_path)
-    if params_path:
+    if params_path and params_path.exists():
         with params_path.open('r') as f:
             params = yaml.load(f, Loader=yaml.FullLoader)
 
