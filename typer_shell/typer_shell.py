@@ -171,6 +171,12 @@ def update(
             _update(name, value, params)
     if name and value:
         _update(name, value, params)
+    if not name and not value and not kv:
+        for key, value in params.items():
+            value = input(f"{key} [{value}]: ")
+            if not value:
+                continue
+            _update(key, value, params)
     print(params)
 
 
