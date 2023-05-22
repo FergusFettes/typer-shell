@@ -12,7 +12,7 @@ I also added some features like:
 
 [See it in action!](https://asciinema.org/a/xdYelspxaxpiJ9AhiekNLZtRI)
 
-And checkout [the demp script](./demo.py):
+And checkout [the demo script](./demo.py):
 
 
 ```python
