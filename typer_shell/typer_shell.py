@@ -1,3 +1,4 @@
+import os
 import tempfile
 from typing_extensions import Annotated
 from typing import Optional, Callable
@@ -75,7 +76,8 @@ def _obj(
     if obj and not getattr(ctx, 'obj'):
         ctx.obj = obj
     elif obj and getattr(ctx, 'obj'):
-        print("Warning: There is already an object in the context. The new object will not be added.")
+        if os.getenv("DEBUG", None):
+            print("Warning: There is already an object in the context. The new object will not be added.")
     elif not obj and not getattr(ctx, 'obj') and params:
         class _obj:
             pass
@@ -85,10 +87,19 @@ def _obj(
 
     # Then add the params
     if params:
-        params_dict = {ctx.command.name: {"params": params, "path": params_path}}
-        if not getattr(ctx.obj, 'params_groups', None):
-            ctx.obj.params_groups = {}
-        ctx.obj.params_groups.update(params_dict)
+        add_params(ctx, params, params_path, ctx.command.name)
+
+
+def add_params(ctx, params, params_path, name):
+    params_dict = {name: {"params": params, "path": params_path}}
+    existing = getattr(ctx.obj, 'params_groups', None)
+    if not existing:
+        ctx.obj.params_groups = {}
+    elif name in existing:
+        return
+    ctx.obj.params_groups.update(params_dict)
+    # And save them to file
+    _save(params_path, params)
 
 
 def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
@@ -141,10 +152,14 @@ def save(ctx: Context):
     """(s) Save the local params to a file"""
     params = ctx.obj.params_groups[ctx.parent.command.name]['params']
     path = ctx.obj.params_groups[ctx.parent.command.name]['path']
+    _save(path, params)
+    print(f"Saved params to {path}")
+
+
+def _save(path, params):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w') as f:
         yaml.dump(params, f)
-    print(f"Saved params to {path}")
 
 
 def load(ctx: Context):
@@ -169,7 +184,7 @@ def update(
         for kv in updates:
             name, value = kv.split("=")
             _update(name, value, params)
-    if name and value:
+    if name and value is not None:
         _update(name, value, params)
     if not name and not value and not kv:
         for key, value in params.items():
@@ -202,13 +217,22 @@ def _print(ctx: Context, value: Annotated[Optional[str], Argument()] = None):
         print(params)
 
 
-def get_params(ctx):
-    name = ctx.command.name
+def get_params(ctx, name=None):
+    return get_params_full(ctx, name).get("params", {})
+
+
+def get_params_path(ctx, name=None):
+    return Path(get_params_full(ctx, name).get("path", ""))
+
+
+def get_params_full(ctx, _name=None):
+    name = _name or ctx.command.name
     if name not in ctx.obj.params_groups:
-        if ctx.parent:
+        if ctx.parent and _name is None:
             name = ctx.parent.command.name
     if name not in ctx.obj.params_groups:
-        print("Cant find params!")
+        if os.getenv("DEBUG", None):
+            print("Cant find params!")
     else:
-        params = ctx.obj.params_groups[name]['params']
-        return params
+        return ctx.obj.params_groups[name]
+    return {}
