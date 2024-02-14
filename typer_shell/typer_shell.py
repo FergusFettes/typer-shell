@@ -145,7 +145,7 @@ def _default(line: str):
 def shell(ctx: Context):
     """Drop into an ipython shell"""
     import IPython
-    IPython.embed()
+    IPython.embed(globals_=globals())
 
 
 def save(ctx: Context):
