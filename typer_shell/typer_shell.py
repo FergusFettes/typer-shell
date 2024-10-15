@@ -14,6 +14,7 @@ from rich import print
 
 def make_typer_shell(
         prompt: str = ">> ",
+        on_finished: Callable = lambda ctx: None,
         intro: str = "\n Welcome to typer-shell! Type help to see commands.\n",
         obj: Optional[object] = None,
         params: Optional[dict] = None,
@@ -43,6 +44,7 @@ def make_typer_shell(
         _obj(ctx, params, params_path, obj)
         if ctx.invoked_subcommand is None:
             shell = make_click_shell(ctx, prompt=prompt, intro=intro)
+            shell.on_finished = on_finished
             shell.default = _default
             launch(ctx)
             shell.cmdloop()

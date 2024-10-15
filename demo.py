@@ -12,8 +12,12 @@ class App:
         self.name = name
 
 
-app = make_typer_shell(prompt="🔥: ", obj=App(), params={"name": "Bob"}, params_path="params.yaml")
-inner_app = make_typer_shell(prompt="🌲: ", params={"name": "Bob"}, params_path="innerparams.yaml")
+def on_finished(_):
+    print('Done! And here is your goodbye message.')
+
+
+app = make_typer_shell(prompt="🔥: ", on_finished=on_finished, obj=App(), params={"name": "Bob"}, params_path="params.yaml")
+inner_app = make_typer_shell(prompt="🌲: ", on_finished=on_finished, params={"name": "Bob"}, params_path="innerparams.yaml")
 app.add_typer(inner_app, name="inner")
 
 
