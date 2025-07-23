@@ -117,7 +117,7 @@ def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
     if not command:
         ctx.parent.get_help()
         return
-    _command = ctx.parent.command.get_command(ctx, command)
+    _command = ctx.parent.command(ctx, command)
     if _command:
         _command.get_help(ctx)
     else:
@@ -132,7 +132,7 @@ def _default(line: str):
     """
     ctx = click.get_current_context()
     default_cmd = (
-        ctx.command(ctx, "default")
+         ctx.command(ctx, "default")
         or ctx.command(ctx, 'help')
     )
     if default_cmd.name == 'help':
