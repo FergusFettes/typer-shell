@@ -131,10 +131,13 @@ def _default(line: str):
     is help.
     """
     ctx = click.get_current_context()
-    default_cmd = (
-         ctx.command(ctx, "default")
-        or ctx.command(ctx, 'help')
-    )
+    if isinstance(ctx.command, click.Group):
+        default_cmd = (
+             ctx.command.get_command(ctx, "default")
+            or ctx.command.get_command(ctx, 'help')
+        )
+    else:
+        default_cmd = ctx.command
     if default_cmd.name == 'help':
         ctx.invoke(default_cmd, ctx=ctx, command=line)
     else:
