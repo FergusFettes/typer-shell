@@ -117,7 +117,11 @@ def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
     if not command:
         ctx.parent.get_help()
         return
-    _command = ctx.parent.command(ctx, command)
+    # get_command() is only defined on Group
+    if isinstance(ctx.parent.command, click.Group):
+        _command = ctx.parent.command.get_command(ctx, command)
+    else:
+        _command = None
     if _command:
         _command.get_help(ctx)
     else:
@@ -131,6 +135,7 @@ def _default(line: str):
     is help.
     """
     ctx = click.get_current_context()
+    # get_command() is only defined on Group
     if isinstance(ctx.command, click.Group):
         default_cmd = (
              ctx.command.get_command(ctx, "default")
