@@ -17,14 +17,14 @@ def make_typer_shell(
         on_finished: Callable = lambda ctx: None,
         intro: str = "\n Welcome to typer-shell! Type help to see commands.\n",
         obj: Optional[object] = None,
-        params: Optional[dict] = None,
+        params: Optional[dict[str,str]] = None,
         params_path: Optional[Path] = None,
         launch: Callable = lambda ctx: None,
-) -> None:
+) -> Typer:
     """Create a typer shell
         'default' is a default command to run if no command is found
         'obj' is an object to pass to the context
-        'params' is a boolean to add a local params command
+        'params' is dictionary of parameters to save in a YAML file
     """
     app = Typer()
 
@@ -58,7 +58,6 @@ def make_typer_shell(
         app.command(name="u", hidden=True)(update)
         app.command(name="print")(_print)
         app.command(name="p", hidden=True)(_print)
-
     return app
 
 
@@ -68,8 +67,8 @@ def _obj(
         params_path: Optional[Path] = None,
         obj: Optional[object] = None
 ):
-    # If there is an object and params, make sure the object has a field in the params dict for the shell
-    # If there is no object and params, make a fkae object for holding the dicts
+    # If there is an object and params, make sure the object has a field in the params dict for the shell.
+    # If there is no object and params, make a fake object for holding the dicts
     # If this is not the main shell and there is already an object from the main shell, print a warning
     if not obj and not params and not params_path:
         return
@@ -133,8 +132,8 @@ def _default(line: str):
     """
     ctx = click.get_current_context()
     default_cmd = (
-        ctx.command.get_command(ctx, "default")
-        or ctx.command.get_command(ctx, 'help')
+        ctx.command(ctx, "default")
+        or ctx.command(ctx, 'help')
     )
     if default_cmd.name == 'help':
         ctx.invoke(default_cmd, ctx=ctx, command=line)
