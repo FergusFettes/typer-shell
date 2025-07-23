@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from pathlib import Path
 
 from rich import print
 from typer import Context
@@ -15,9 +15,24 @@ class App:
 def on_finished(_):
     print('Done! And here is your goodbye message.')
 
+# Create the outer shell.
+app = make_typer_shell(
+    prompt="🔥: ",
+    on_finished=on_finished,
+    obj=App(),
+    params={"name": "Bob"},
+    params_path=Path("params.yaml")
+)
 
-app = make_typer_shell(prompt="🔥: ", on_finished=on_finished, obj=App(), params={"name": "Bob"}, params_path="params.yaml")
-inner_app = make_typer_shell(prompt="🌲: ", on_finished=on_finished, params={"name": "Bob"}, params_path="innerparams.yaml")
+# Create an inner shell using a very similar call
+# to the factory function. This inner shell is only
+# accessible from the main shell.
+inner_app = make_typer_shell(
+    prompt="🌲: ",
+    on_finished=on_finished,
+    params={"name": "Bob"},
+    params_path=Path("innerparams.yaml")
+)
 app.add_typer(inner_app, name="inner")
 
 
