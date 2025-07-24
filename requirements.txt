@@ -25,6 +25,5 @@ six==1.16.0
 stack-data==0.6.3
 traitlets==5.14.3
 typer==0.16.0
--e git+ssh://git@github.com/fergusfettes/typer-shell@9a7d4769233b528ffd69cc7d012b00d4b28b5715#egg=typer_shell
 typing_extensions==4.12.2
 wcwidth==0.2.13

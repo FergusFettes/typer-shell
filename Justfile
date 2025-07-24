@@ -11,7 +11,7 @@ publish: reqs clear
 	poetry publish --build -u __token__ -p $PYPI_TOKEN
 
 reqs:
-	poetry run pip freeze > requirements.txt
+	poetry run pip freeze | grep -v "^-e" > requirements.txt
 
 clear:
   rm -rf dist
