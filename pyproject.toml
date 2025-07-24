@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "typer_shell"}]
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<3.13"
+python = ">=3.8.1,<3.14"
 typer = "^0.16.0"
 click = "^8.1.3"
 rich = "^13.3.5"
