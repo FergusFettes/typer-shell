@@ -21,6 +21,7 @@ def make_typer_shell(
         params: Optional[dict[str,str]] = None,
         params_path: Optional[Path] = None,
         launch: Callable = lambda ctx: None,
+        user_callback: Optional[Callable] = None,
 ) -> Typer:
     """Create a typer shell
         'default' is a default command to run if no command is found
@@ -42,6 +43,8 @@ def make_typer_shell(
 
     @app.callback(invoke_without_command=True)
     def main(ctx: Context):
+        if user_callback:
+            user_callback(ctx)
         _obj(ctx, params, params_path, obj)
         if ctx.invoked_subcommand is None:
             shell = make_click_shell(ctx, prompt=prompt, intro=intro)
