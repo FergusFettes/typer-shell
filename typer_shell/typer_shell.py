@@ -1,26 +1,23 @@
 import os
-from typing_extensions import Annotated
-from typing import Optional, Callable
-from pathlib import Path
+from typing import Annotated, Callable, Optional
 
 import click
 from click_shell import make_click_shell
-from typer import Context, Typer, Argument
-
 from rich import print
-from rich.panel import Panel
+from typer import Argument, Context, Typer
+
 
 def make_typer_shell(
-        prompt: str = ">> ",
-        on_finished: Callable = lambda ctx: None,
-        intro: str = "\n Welcome to typer-shell! Type help to see commands.\n",
-        obj: Optional[object] = None,
-        launch: Callable = lambda ctx: None,
-        user_callback: Optional[Callable] = None,
+    prompt: str = ">> ",
+    on_finished: Callable = lambda ctx: None,
+    intro: str = "\n Welcome to typer-shell! Type help to see commands.\n",
+    obj: Optional[object] = None,
+    launch: Callable = lambda ctx: None,
+    user_callback: Optional[Callable] = None,
 ) -> Typer:
     """Create a typer shell
-        'default' is a default command to run if no command is found
-        'obj' is an object to pass to the context
+    'default' is a default command to run if no command is found
+    'obj' is an object to pass to the context
     """
     app = Typer()
 
@@ -30,10 +27,10 @@ def make_typer_shell(
     def main(ctx: Context):
         if user_callback:
             user_callback(ctx)
-        
-        if obj and not getattr(ctx, 'obj', None):
+
+        if obj and not getattr(ctx, "obj", None):
             ctx.obj = obj
-        elif obj and getattr(ctx, 'obj', None):
+        elif obj and getattr(ctx, "obj", None):
             if os.getenv("DEBUG", None):
                 print("Warning: There is already an object in the context. The new object will not be added.")
 
@@ -45,6 +42,7 @@ def make_typer_shell(
             shell.cmdloop()
 
     return app
+
 
 def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
     if command == "help":
@@ -62,6 +60,7 @@ def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
     else:
         print(f"\n Command not found: {command}")
 
+
 def _default(line: str):
     """Fixes the click default command to work with typer.
     If there is a function called 'default' in the local context, it will
@@ -71,13 +70,10 @@ def _default(line: str):
     ctx = click.get_current_context()
     # get_command() is only defined on Group
     if isinstance(ctx.command, click.Group):
-        default_cmd = (
-             ctx.command.get_command(ctx, "default")
-            or ctx.command.get_command(ctx, 'help')
-        )
+        default_cmd = ctx.command.get_command(ctx, "default") or ctx.command.get_command(ctx, "help")
     else:
         default_cmd = ctx.command
-    if default_cmd.name == 'help':
+    if default_cmd.name == "help":
         ctx.invoke(default_cmd, ctx=ctx, command=line)
     else:
         ctx.invoke(default_cmd, ctx=ctx, line=line)

@@ -1,8 +1,7 @@
 from .typer_shell import (
     make_typer_shell,
 )
-from .utils import running_in_cli, IO
-
+from .utils import IO, running_in_cli
 
 __all__ = [
     "make_typer_shell",
