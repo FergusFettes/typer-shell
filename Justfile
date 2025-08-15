@@ -6,7 +6,7 @@ install:
 build:
 	uv build
 
-publish: clear
+publish: clear build
 	uv publish --token $PYPI_TOKEN
 
 dev:
