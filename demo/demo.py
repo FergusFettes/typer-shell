@@ -18,10 +18,10 @@ def user_callback(ctx: Context):
     print("This is a user callback!")
 
 app = make_typer_shell(prompt="🔥: ", on_finished=on_finished, obj=App(), user_callback=user_callback)
-add_sample_commands(app, params={"name": "Bob"}, params_path=Path("params.yaml"))
+add_sample_commands(app)
 
 inner_app = make_typer_shell(prompt="🌲: ", on_finished=on_finished)
-add_sample_commands(inner_app, params={"name": "Bob"}, params_path=Path("innerparams.yaml"))
+add_sample_commands(inner_app)
 
 app.add_typer(inner_app, name="inner")
 

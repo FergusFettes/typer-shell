@@ -1,133 +1,124 @@
 import os
-import tempfile
-from typing_extensions import Annotated
-from typing import Optional, Callable
+from datetime import datetime
 from pathlib import Path
+from typing_extensions import Annotated
+from typing import Optional
 
-import yaml
 from typer import Context, Typer, Argument
-
 from rich import print
+from rich.table import Table
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.panel import Panel
+from rich.prompt import Prompt
+import time
 
-def add_sample_commands(
-        app: Typer,
-        params: Optional[dict] = None,
-        params_path: Optional[Path] = None,
-):
-    if params and not params_path:
-        params_path = Path(tempfile.NamedTemporaryFile().name)
-    if params_path:
-        params_path = Path(params_path)
-    if params_path and params_path.exists():
-        with params_path.open('r') as f:
-            params = yaml.load(f, Loader=yaml.FullLoader)
-
+def add_sample_commands(app: Typer):
+    """Add sample utility commands to the shell"""
+    
     @app.command(hidden=True)
     def shell(ctx: Context):
         """Drop into an ipython shell"""
         import IPython
         IPython.embed(globals_=globals())
-
-    if not params:
-        return
-
+    
+    # File Operations
     @app.command()
-    def save(ctx: Context):
-        """(s) Save the local params to a file"""
-        params = ctx.obj.params_groups[ctx.parent.command.name]['params']
-        path = ctx.obj.params_groups[ctx.parent.command.name]['path']
-        _save(path, params)
-        print(f"Saved params to {path}")
-
-    @app.command(name="s", hidden=True)
-    def save_alias(ctx: Context):
-        save(ctx)
-
-    def _save(path, params):
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with path.open('w') as f:
-            yaml.dump(params, f)
-
+    def ls(path: str = "."):
+        """List directory contents"""
+        p = Path(path)
+        if not p.exists():
+            print(f"[red]Path does not exist: {path}[/red]")
+            return
+        
+        if p.is_file():
+            print(f"[blue]{p.name}[/blue]")
+            return
+            
+        items = []
+        for item in sorted(p.iterdir()):
+            if item.is_dir():
+                items.append(f"[bold blue]{item.name}/[/bold blue]")
+            else:
+                items.append(f"[white]{item.name}[/white]")
+        
+        for item in items:
+            print(item)
+    
     @app.command()
-    def load(ctx: Context):
-        """(l) Load the local params from a file"""
-        path = ctx.obj.params_groups[ctx.parent.command.name]['path']
-        with path.open('r') as f:
-            params = yaml.load(f, Loader=yaml.FullLoader)
-        ctx.obj.params_groups[ctx.parent.command.name]['params'] = params
-        print(f"Loaded params from {path}")
-
-    @app.command(name="l", hidden=True)
-    def load_alias(ctx: Context):
-        load(ctx)
-
-    @app.command()
-    def update(
-        ctx: Context,
-        name: Annotated[Optional[str], Argument()] = None,
-        value: Annotated[Optional[str], Argument()] = None,
-        kv: Annotated[Optional[str], Argument()] = None,
-    ):
-        "(u) Update a config value, or set of values. (kv in the form of 'name1=value1,name2=value2')"
-        params = ctx.obj.params_groups[ctx.parent.command.name]['params']
-        if kv:
-            updates = kv.split(",")
-            for kv in updates:
-                name, value = kv.split("=")
-                _update(name, value, params)
-        if name and value is not None:
-            _update(name, value, params)
-        if not name and not value and not kv:
-            for key, value in params.items():
-                value = input(f"{key} [{value}]: ")
-                if not value:
-                    continue
-                _update(key, value, params)
-        print(params)
-
-    @app.command(name="u", hidden=True)
-    def update_alias(ctx: Context, name: Annotated[Optional[str], Argument()] = None, value: Annotated[Optional[str], Argument()] = None, kv: Annotated[Optional[str], Argument()] = None):
-        update(ctx, name, value, kv)
-
-    def _update(key, value, dict):
+    def cat(file_path: str):
+        """Show file contents"""
+        p = Path(file_path)
+        if not p.exists():
+            print(f"[red]File does not exist: {file_path}[/red]")
+            return
+        
+        if p.is_dir():
+            print(f"[red]Cannot cat directory: {file_path}[/red]")
+            return
+            
         try:
-            value = eval(value)
-        except (SyntaxError, NameError):
-            pass
-
-        # If the value is a string, fix \ns (they should be proper newlines)
-        if isinstance(value, str):
-            value = value.replace("\\n", "\n").replace("\\t", "\t")
-
-        dict.update({key: value})
-
-    @app.command(name="print")
-    def _print(ctx: Context, value: Annotated[Optional[str], Argument()] = None):
-        """(p) Print the local params (or a specific value)"""
-        params = get_params(ctx)
+            content = p.read_text()
+            print(content)
+        except Exception as e:
+            print(f"[red]Error reading file: {e}[/red]")
+    
+    @app.command()
+    def pwd():
+        """Show current working directory"""
+        print(f"[bold green]{Path.cwd()}[/bold green]")
+    
+    # Rich Examples
+    @app.command()
+    def table():
+        """Show a sample rich table"""
+        table = Table(title="Sample Data")
+        table.add_column("Name", style="cyan", no_wrap=True)
+        table.add_column("Age", style="magenta")
+        table.add_column("City", style="green")
+        
+        table.add_row("Alice", "25", "New York")
+        table.add_row("Bob", "30", "San Francisco")
+        table.add_row("Charlie", "35", "London")
+        
+        print(table)
+    
+    @app.command()
+    def progress():
+        """Show a progress bar demonstration"""
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+        ) as progress:
+            task = progress.add_task("Processing...", total=100)
+            
+            for i in range(100):
+                time.sleep(0.02)
+                progress.update(task, advance=1)
+    
+    @app.command()
+    def ask(question: str = "What's your name?"):
+        """Interactive input prompt"""
+        answer = Prompt.ask(question)
+        print(f"[bold green]You answered: {answer}[/bold green]")
+    
+    @app.command()
+    def panel(text: str = "Hello World!"):
+        """Show text in a rich panel"""
+        panel = Panel(text, title="Demo Panel", border_style="blue")
+        print(panel)
+    
+    # System Info
+    @app.command()
+    def env(var: str):
+        """Show environment variable"""
+        value = os.getenv(var)
         if value:
-            print(params[value])
+            print(f"[bold green]{var}[/bold green]=[yellow]{value}[/yellow]")
         else:
-            print(params)
-
-    @app.command(name="p", hidden=True)
-    def _print_alias(ctx: Context, value: Annotated[Optional[str], Argument()] = None):
-        _print(ctx, value)
-
-    def get_params(ctx, name=None):
-        return get_params_full(ctx, name).get("params", {})
-
-    def get_params_path(ctx, name=None):
-        return Path(get_params_full(ctx, name).get("path", ""))
-
-    def get_params_full(ctx, _name=None):
-        name = _name or ctx.command.name
-        if name not in ctx.obj.params_groups:
-            if ctx.parent and _name is None:
-                name = ctx.parent.command.name
-        if name not in ctx.obj.params_groups:
-            if os.getenv("DEBUG", None):
-                print("Cant find params!")
-        else:
-            return ctx.obj.params_groups[name]
-        return {}
+            print(f"[red]Environment variable '{var}' not found[/red]")
+    
+    @app.command()
+    def date():
+        """Show current date and time"""
+        now = datetime.now()
+        print(f"[bold blue]{now.strftime('%Y-%m-%d %H:%M:%S')}[/bold blue]")
