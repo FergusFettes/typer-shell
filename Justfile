@@ -1,14 +1,31 @@
 set dotenv-load
 
-
 install:
-	pip install --user -U .
+	uv sync
 
 build:
-	poetry build
+	uv build
 
 publish: clear
-	poetry publish --build -u __token__ -p $PYPI_TOKEN
+	uv publish --token $PYPI_TOKEN
+
+dev:
+	uv sync
+
+format:
+	uv run ruff format .
+
+lint:
+	uv run ruff check .
+
+fix:
+	uv run ruff check --fix .
+
+demo:
+	uv run python demo/demo.py
+
+simple-demo:
+	uv run python demo/simple_demo.py
 
 clear:
-  rm -rf dist
+	rm -rf dist
