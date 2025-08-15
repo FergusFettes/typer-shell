@@ -5,7 +5,7 @@ from click import get_current_context
 
 
 def running_in_cli():
-    get_current_context(silent=True) is not None
+    return get_current_context(silent=True) is not None
 
 
 class IO:
@@ -20,7 +20,7 @@ class IO:
             prompt = click.get_text_stream("stdin").read().strip()
             click.echo("Generating...", err=True)
             if not prompt:
-                click.echo("No prompt provided. Use the -p flag or pipe a prompt to stdin.", err=True, color="red")
+                click.echo("No prompt provided. Use the -p flag or pipe a prompt to stdin.", err=True, color=True)
                 raise click.Abort()
         return prompt
 
