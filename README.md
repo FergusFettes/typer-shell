@@ -14,6 +14,15 @@ I also added some features like:
 
 And checkout [the demo script](./demo.py):
 
+To run the demos, you can execute them with `poetry run`:
+
+```bash
+poetry run python demo/demo.py
+poetry run python demo/simple_demo.py
+```
+
+There are also sample helper functions in `typer_shell/samples.py` that you can use in your own applications.
+
 
 ```python
 #!/usr/bin/env python

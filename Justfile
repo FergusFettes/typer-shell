@@ -1,17 +1,14 @@
 set dotenv-load
 
 
-install: reqs
+install:
 	pip install --user -U .
 
-build: reqs
+build:
 	poetry build
 
-publish: reqs clear
+publish: clear
 	poetry publish --build -u __token__ -p $PYPI_TOKEN
-
-reqs:
-	poetry run pip freeze | grep -v "^-e" > requirements.txt
 
 clear:
   rm -rf dist

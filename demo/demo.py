@@ -14,7 +14,10 @@ class App:
 def on_finished(_):
     print('Done! And here is your goodbye message.')
 
-app = make_typer_shell(prompt="🔥: ", on_finished=on_finished, obj=App())
+def user_callback(ctx: Context):
+    print("This is a user callback!")
+
+app = make_typer_shell(prompt="🔥: ", on_finished=on_finished, obj=App(), user_callback=user_callback)
 add_sample_commands(app, params={"name": "Bob"}, params_path=Path("params.yaml"))
 
 inner_app = make_typer_shell(prompt="🌲: ", on_finished=on_finished)
