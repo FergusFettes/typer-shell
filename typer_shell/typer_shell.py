@@ -10,6 +10,7 @@ from click_shell import make_click_shell
 from typer import Context, Typer, Argument
 
 from rich import print
+from rich.panel import Panel
 
 
 def make_typer_shell(
