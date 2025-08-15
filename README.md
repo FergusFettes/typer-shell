@@ -59,3 +59,30 @@ def default(ctx: Context, line: str = "Bob"):
 if __name__ == "__main__":
     app()
 ```
+
+## Using Callbacks
+
+Because `typer-shell` uses Typer's callback mechanism to launch the interactive shell, you cannot use the standard `@app.callback()` decorator, as it will conflict and prevent the shell from loading.
+
+If you need to run code before the shell launches (for example, to set up state), you can pass a function to the `user_callback` parameter in `make_typer_shell`.
+
+Your function will be called with the `Typer.Context` object before the shell starts.
+
+```python
+import typer
+from typer_shell import make_typer_shell
+
+def my_setup_logic(ctx: typer.Context):
+    print("This runs before the shell starts!")
+    # You can access and modify the context object here
+    ctx.obj.my_value = 42
+
+app = make_typer_shell(user_callback=my_setup_logic)
+
+@app.command()
+def my_command(ctx: typer.Context):
+    print(f"my_value is: {ctx.obj.my_value}")
+
+if __name__ == "__main__":
+    app()
+```
