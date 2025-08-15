@@ -2,7 +2,7 @@
 name = "typer-shell"
 version = "1.0.1"
 description = "A shell for typer apps with autocompletion and history"
-authors = [{ name = "Fergus Fettes", email = "fergus <fergusfettes@gmail.com>" }]
+authors = [{ name = "Fergus Fettes", email = "fergusfettes@gmail.com" }]
 requires-python = ">=3.9.0"
 readme = "README.md"
 dependencies = [
