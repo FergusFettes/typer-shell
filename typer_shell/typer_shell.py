@@ -106,14 +106,14 @@ def add_params(ctx, params, params_path, name):
 def help(ctx: Context, command: Annotated[Optional[str], Argument()] = None):
     if command == "help":
         print("\n Type 'command --help' or 'help <command>' for help on a specific command.")
-        # print(Panel(
-        #     "You have found the secret double help!\n"
-        #     ":rainbow: Congratulations! :sparkles:\n"
-        #     "There are a few commands that are hidden from the help menu.\n"
-        #     "One interesting one is 'shell' which will drop you into an ipython shell. With the context.",
-        #     title="Double Help",
-        #     style="bold magenta"
-        # ))
+        print(Panel(
+            "You have found the secret double help!\n"
+            ":rainbow: Congratulations! :sparkles:\n"
+            "There are a few commands that are hidden from the help menu.\n"
+            "One interesting one is 'shell' which will drop you into an ipython shell. With the context.",
+            title="Double Help",
+            style="bold magenta"
+        ))
     if not command:
         ctx.parent.get_help()
         return
