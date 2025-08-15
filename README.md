@@ -14,11 +14,17 @@ I also added some features like:
 
 And checkout [the demo script](./demo.py):
 
-To run the demos, you can execute them with `poetry run`:
+To run the demos, you can execute them with `uv run`:
 
 ```bash
-poetry run python demo/demo.py
-poetry run python demo/simple_demo.py
+uv run python demo/demo.py
+uv run python demo/simple_demo.py
+```
+
+Or use the convenient just commands:
+```bash
+just demo
+just simple-demo
 ```
 
 There are also sample helper functions in `typer_shell/samples.py` that you can use in your own applications. These include:
@@ -61,4 +67,26 @@ def my_command(ctx: typer.Context):
 
 if __name__ == "__main__":
     app()
+```
+
+## Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and [ruff](https://docs.astral.sh/ruff/) for linting/formatting.
+
+```bash
+# Setup development environment
+uv sync
+
+# Run demos
+just demo
+just simple-demo
+
+# Code quality
+just format  # Format code
+just lint    # Check for issues
+just fix     # Auto-fix issues
+
+# Build and publish
+just build
+just publish
 ```
