@@ -1,6 +1,6 @@
 [project]
 name = "typer-shell"
-version = "0.2.2"
+version = "1.0.0"
 requires-python  = ">=3.9.0"
 description = "A shell for typer apps with autocompletion and history"
 authors = [
