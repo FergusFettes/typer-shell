@@ -1,13 +1,10 @@
 [project]
 name = "typer-shell"
 version = "1.0.1"
-requires-python  = ">=3.9.0"
 description = "A shell for typer apps with autocompletion and history"
-authors = [
-    {name= "Fergus Fettes", email="fergus <fergusfettes@gmail.com>"}
-]
+authors = [{ name = "Fergus Fettes", email = "fergus <fergusfettes@gmail.com>" }]
+requires-python = ">=3.9.0"
 readme = "README.md"
-
 dependencies = [
     "typer ~=0.16.0",
     "click >=8.1.0",
@@ -16,24 +13,28 @@ dependencies = [
     "pyyaml ~=6.0",
 ]
 
-[tool.poetry]
-packages = [{include = "typer_shell"}]
+[dependency-groups]
+python_console = ["ipython"]
+dev = [
+    "ipdb>=0.13.13,<0.14.0",
+    "ruff>=0.1.0",
+]
 
-[tool.poetry.dependencies]
-# All are currently in [project.dependencies].
+[tool.uv]
+default-groups = [
+    "python_console",
+    "dev",
+]
 
-# Use 'poetry install --with python_console'
-# to support the interactive Python debug console.
-[tool.poetry.group.python_console.dependencies]
-ipython = "*"
+[tool.hatch.build.targets.sdist]
+include = ["typer_shell"]
 
-[tool.poetry.group.dev.dependencies]
-ipdb = ">=0.13.13,<0.14.0"
-ruff = ">=0.1.0"
+[tool.hatch.build.targets.wheel]
+include = ["typer_shell"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.ruff]
 line-length = 120
