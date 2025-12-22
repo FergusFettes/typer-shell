@@ -6,7 +6,7 @@ authors = [{ name = "Fergus Fettes", email = "fergusfettes@gmail.com" }]
 requires-python = ">=3.9.0"
 readme = "README.md"
 dependencies = [
-    "typer ~=0.16.0",
+    "typer>=0.16,<0.21",
     "click >=8.1.0",
     "rich >=10.11.0",
     "click_shell ~=2.1",
